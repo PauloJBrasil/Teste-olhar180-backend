@@ -1,4 +1,4 @@
-# TaskManager.API — Documentação do Projeto
+# Teste-olhar180-backend — Documentação do Projeto
 
 Este repositório contém a API do projeto TaskManager, desenvolvida para um teste técnico. A API expõe endpoints para autenticação de usuários e CRUD de tarefas. O foco é demonstrar arquitetura organizada, regras de autenticação básicas, persistência com SQLite e uma superfície de endpoints consistente para consumo por um frontend React/Vite.
 
@@ -21,10 +21,10 @@ Este repositório contém a API do projeto TaskManager, desenvolvida para um tes
 ## Configuração e Execução
 - Pré-requisitos: `SDK .NET 8`
 - Configuração padrão:
-  - Banco: `SQLite` em `TaskManager.Api/tasks.db`
+  - Banco: `SQLite` em `Teste-olhar180-backend/tasks.db`
   - Origin do frontend: `http://localhost:5173` (alterável via `appsettings.json` ⇒ `FrontendOrigin` ou `FrontendOrigins` para múltiplas origens)
 - Rodando a API:
-  - `cd TaskManager.Api`
+  - `cd Teste-olhar180-backend`
   - `dotnet restore`
   - `dotnet build`
   - `dotnet run`
