@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Api.Data;
 using TaskManager.Api.Models;
@@ -7,14 +8,17 @@ using TaskManager.Api.Services;
 namespace TaskManager.Api.Controllers;
 
 [ApiController]
-[Route("api/auth")]
+[Route("api/v1/auth")]
+[AllowAnonymous]
 public class AuthController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly JwtTokenGenerator _jwt;
 
-    public AuthController(AppDbContext db)
+    public AuthController(AppDbContext db, JwtTokenGenerator jwt)
     {
         _db = db;
+        _jwt = jwt;
     }
 
     [HttpPost("register")]
@@ -39,7 +43,8 @@ public class AuthController : ControllerBase
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
         var resp = new UserResponse(user.Id, user.Username, user.Email, user.Phone, user.CreatedAt, user.UpdatedAt);
-        return Created($"/api/users/{user.Id}", resp);
+        var token = _jwt.GenerateToken(user);
+        return Created($"/api/v1/users/{user.Id}", new AuthResponse(token, resp));
     }
 
     [HttpPost("login")]
@@ -50,6 +55,7 @@ public class AuthController : ControllerBase
         var ok = Security.VerifyPassword(req.Password, user.PasswordHash, user.PasswordSalt);
         if (!ok) return Unauthorized();
         var resp = new UserResponse(user.Id, user.Username, user.Email, user.Phone, user.CreatedAt, user.UpdatedAt);
-        return Ok(resp);
-    }
+        var token = _jwt.GenerateToken(user);
+        return Ok(new AuthResponse(token, resp));
+}
 }

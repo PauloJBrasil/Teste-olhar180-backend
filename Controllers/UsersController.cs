@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using TaskManager.Api.Data;
 using TaskManager.Api.Models;
 using TaskManager.Api.Services;
@@ -6,7 +7,8 @@ using TaskManager.Api.Services;
 namespace TaskManager.Api.Controllers;
 
 [ApiController]
-[Route("api/users")]
+[Route("api/v1/users")]
+[Authorize]
 public class UsersController : ControllerBase
 {
     private readonly AppDbContext _db;
