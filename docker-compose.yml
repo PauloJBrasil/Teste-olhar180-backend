@@ -9,11 +9,11 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: Data Source=/data/tasks.db
       # Configure uma ou múltiplas origens
-      FrontendOrigins: ${FrontendOrigins:-http://localhost:5173}
+      FrontendOrigins: ${FrontendOrigins:-https://teste-olhar180-frontend.onrender.com}
       # JWT (ajuste conforme necessário)
       Jwt__Issuer: TaskManager
       Jwt__Audience: TaskManager
-      Jwt__SecretKey: ${Jwt__SecretKey:-supersecretkey123}
+      Jwt__Secret: ${Jwt__Secret:-b6f9d3c2a1e04f8bb3c76a5d9e2f1c0a7b8d6e5f4a3b2c1d0e9f8a7b6c5d4e3f}
     volumes:
       - api_data:/data
     ports:

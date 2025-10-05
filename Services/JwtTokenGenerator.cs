@@ -18,7 +18,7 @@ public class JwtTokenGenerator
 
     public string GenerateToken(User user)
     {
-        var secret = _config["Jwt:Secret"] ?? "supersecret-key-change-me";
+        var secret = _config["Jwt:Secret"] ?? "supersecret-key-change-me-1234-567890";
         var issuer = _config["Jwt:Issuer"] ?? "TaskManager.Api";
         var audience = _config["Jwt:Audience"] ?? "TaskManager.Client";
 

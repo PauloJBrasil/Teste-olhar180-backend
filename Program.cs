@@ -26,12 +26,14 @@ if (!string.IsNullOrWhiteSpace(originsCsv))
 {
     allowedOrigins = originsCsv
         .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .Select(o => o.TrimEnd('/'))
+        .Distinct()
         .ToArray();
 }
 else
 {
     var fallbackOrigin = builder.Configuration.GetValue<string>("FrontendOrigin") ?? "http://localhost:5173";
-    allowedOrigins = new[] { fallbackOrigin };
+    allowedOrigins = new[] { fallbackOrigin.TrimEnd('/') };
 }
 
 builder.Services.AddCors(options =>
@@ -51,7 +53,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        var secret = builder.Configuration["Jwt:Secret"] ?? "supersecret-key-change-me";
+        var secret = builder.Configuration["Jwt:Secret"] ?? "b6f9d3c2a1e04f8bb3c76a5d9e2f1c0a7b8d6e5f4a3b2c1d0e9f8a7b6c5d4e3f";
         var issuer = builder.Configuration["Jwt:Issuer"] ?? "TaskManager.Api";
         var audience = builder.Configuration["Jwt:Audience"] ?? "TaskManager.Client";
         options.TokenValidationParameters = new TokenValidationParameters
@@ -77,8 +79,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
+// Enable HTTPS redirection only if an HTTPS URL is configured
+var urlsConfig = app.Configuration["Urls"] ?? Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? string.Empty;
+if (urlsConfig.Contains("https://", StringComparison.OrdinalIgnoreCase))
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("Default");
 app.UseAuthentication();
 app.UseAuthorization();
