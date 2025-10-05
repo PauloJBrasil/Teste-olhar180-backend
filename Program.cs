@@ -19,12 +19,25 @@ builder.Services.AddControllers(options =>
 
 // Rotas versionadas são aplicadas nos Controllers via prefixo /api/v1
 
-// CORS básico para desenvolvimento (ajuste origin do frontend)
-var allowedOrigin = builder.Configuration.GetValue<string>("FrontendOrigin") ?? "http://localhost:5173";
+// CORS: suporta múltiplas origens via FrontendOrigins (CSV) com fallback para FrontendOrigin
+var originsCsv = builder.Configuration.GetValue<string>("FrontendOrigins");
+string[] allowedOrigins;
+if (!string.IsNullOrWhiteSpace(originsCsv))
+{
+    allowedOrigins = originsCsv
+        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .ToArray();
+}
+else
+{
+    var fallbackOrigin = builder.Configuration.GetValue<string>("FrontendOrigin") ?? "http://localhost:5173";
+    allowedOrigins = new[] { fallbackOrigin };
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Default", policy =>
-        policy.WithOrigins(allowedOrigin)
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod());
 });

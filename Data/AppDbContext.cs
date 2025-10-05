@@ -20,6 +20,8 @@ public class AppDbContext : DbContext
             entity.Property(t => t.Title).IsRequired().HasMaxLength(200);
             entity.Property(t => t.Status).IsRequired().HasMaxLength(50);
             entity.Property(t => t.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            // Índice para acelerar filtros por proprietário
+            entity.HasIndex(t => t.UserId);
         });
 
         modelBuilder.Entity<User>(entity =>

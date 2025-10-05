@@ -7,7 +7,7 @@ Este repositório contém a API do projeto TaskManager, desenvolvida para um tes
 - `Controllers` (arquitetura MVC básica) para organização dos endpoints
 - `Entity Framework Core` com `SQLite` (`Data Source=tasks.db`)
 - `Swagger/OpenAPI` habilitado em `Development` para inspeção dos endpoints
-- `CORS` configurado via `FrontendOrigin` (default: `http://localhost:5173`)
+- `CORS` configurado via `FrontendOrigin` ou `FrontendOrigins` (CSV, múltiplas origens)
 - Autenticação `JWT (Bearer)` com geração de token no login/registro
 - Filtro global de exceções com resposta `ProblemDetails` e logging estruturado
 - Rotas versionadas com prefixo `/api/v1/*`
@@ -22,7 +22,7 @@ Este repositório contém a API do projeto TaskManager, desenvolvida para um tes
 - Pré-requisitos: `SDK .NET 8`
 - Configuração padrão:
   - Banco: `SQLite` em `TaskManager.Api/tasks.db`
-  - Origin do frontend: `http://localhost:5173` (alterável via `appsettings.json` ⇒ `FrontendOrigin`)
+  - Origin do frontend: `http://localhost:5173` (alterável via `appsettings.json` ⇒ `FrontendOrigin` ou `FrontendOrigins` para múltiplas origens)
 - Rodando a API:
   - `cd TaskManager.Api`
   - `dotnet restore`
@@ -32,6 +32,7 @@ Este repositório contém a API do projeto TaskManager, desenvolvida para um tes
 
 ### appsettings.json
 - `FrontendOrigin`: define a origem permitida no CORS para o frontend.
+- `FrontendOrigins`: lista CSV de origens permitidas (ex.: `"http://localhost:5173,https://meuapp.com"`).
 - `ConnectionStrings:DefaultConnection`: permite alterar o caminho do SQLite.
 - `Jwt`: `Secret`, `Issuer`, `Audience` para configuração de tokens
 
@@ -73,6 +74,12 @@ UserId: string?
 - Senhas são armazenadas com `hash` e `salt` via `Security` (`CreatePasswordHash`, `VerifyPassword`)
 - JWT gerado no login/registro, usar `Authorization: Bearer <token>` para acessar endpoints protegidos
 
+## Regras de Autorização de Tarefas
+- Todos os endpoints de tarefas (`/api/v1/tasks`) estão protegidos por JWT.
+- A listagem (`GET /api/v1/tasks`) retorna somente tarefas do usuário autenticado.
+- A leitura, atualização e exclusão (`GET/PUT/DELETE /api/v1/tasks/{id}`) exigem que a tarefa pertença ao usuário autenticado; caso contrário, a API responde `403 Forbid`.
+- Na criação (`POST /api/v1/tasks`), o servidor vincula automaticamente `UserId` ao usuário do token, ignorando qualquer valor enviado pelo cliente.
+- Observação: tarefas antigas criadas sem `UserId` não aparecerão na listagem filtrada.
 ## Endpoints
 
 ### Auth
@@ -157,5 +164,19 @@ UserId: string?
 - Criação de migrações: `dotnet ef migrations add <nome>`
 - Aplicação de migrações: `dotnet ef database update`
 
-## Licença
-Este projeto inclui um arquivo `LICENSE`. Ajuste conforme necessidade do teste técnico.
+## Execução com Docker Compose
+Este projeto inclui um `docker-compose.yml` na raiz para subir API e frontend:
+
+```
+docker compose up --build
+```
+
+Serviços:
+- API: `http://localhost:8080` (Swagger em `/swagger`) — persiste `tasks.db` em volume `api_data`.
+- Frontend: `http://localhost:8081` — Nginx servindo o build e proxy de `/api` para `api:8080`.
+
+Variáveis relevantes (podem ser definidas no ambiente):
+- `FrontendOrigin`: origem do frontend para CORS (ex.: `http://localhost:8081`).
+- `FrontendOrigins`: múltiplas origens permitidas (CSV).
+- `ConnectionStrings__DefaultConnection`: apontamento do SQLite (ex.: `Data Source=/data/tasks.db`).
+- `Jwt__Secret`, `Jwt__Issuer`, `Jwt__Audience`: configuração do JWT.
